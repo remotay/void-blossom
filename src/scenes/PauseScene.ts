@@ -58,8 +58,9 @@ export class PauseScene extends Phaser.Scene {
       {
         label: 'Options',
         action: () => {
-          // Pause stays, open options
-          this.scene.start('OptionsScene', { returnScene: 'PauseScene' });
+          // Launch options as overlay on top of pause; pause stays alive underneath
+          this.scene.launch('OptionsScene', { returnScene: 'PauseScene' });
+          this.scene.pause();  // pause ourselves so Options gets input
         },
       },
       {

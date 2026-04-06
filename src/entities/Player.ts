@@ -61,6 +61,9 @@ export class Player extends Phaser.GameObjects.Container {
   public hitboxX = 0;
   public hitboxY = 0;
 
+  // Track which bullets have already been grazed (by pool index) to avoid per-frame spam
+  private grazedBullets = new Set<number>();
+
   // Death flag to prevent multiple death triggers per frame
   private dead = false;
 
@@ -398,8 +401,11 @@ export class Player extends Phaser.GameObjects.Container {
 
   // ── Graze Detection ───────────────────────────────────────────────
 
-  checkGraze(bulletX: number, bulletY: number, bulletRadius: number): boolean {
+  checkGraze(bulletX: number, bulletY: number, bulletRadius: number, bulletIndex: number = -1): boolean {
     if (this.invulnerable || this.dead) return false;
+
+    // Each bullet only grazes once
+    if (bulletIndex >= 0 && this.grazedBullets.has(bulletIndex)) return false;
 
     const dx = bulletX - this.hitboxX;
     const dy = bulletY - this.hitboxY;
@@ -412,24 +418,18 @@ export class Player extends Phaser.GameObjects.Container {
       this.grazeCount++;
       this.playerScore += GRAZE_SCORE;
 
+      if (bulletIndex >= 0) this.grazedBullets.add(bulletIndex);
+
       this.scene.events.emit('graze', { x: bulletX, y: bulletY });
-
-      // Small visual graze spark
-      const spark = this.scene.add.circle(bulletX, bulletY, 3, COLORS.primary, 0.8);
-      spark.setBlendMode(Phaser.BlendModes.ADD);
-      this.scene.tweens.add({
-        targets: spark,
-        scaleX: 2,
-        scaleY: 2,
-        alpha: 0,
-        duration: 200,
-        onComplete: () => spark.destroy(),
-      });
-
       return true;
     }
 
     return false;
+  }
+
+  /** Clear graze tracking (call when bullets are cleared, e.g. bombs/stage transitions) */
+  clearGrazeTracking(): void {
+    this.grazedBullets.clear();
   }
 
   // Check if a bullet actually hits the player hitbox

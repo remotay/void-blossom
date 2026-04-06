@@ -322,8 +322,8 @@ export class GameScene extends Phaser.Scene {
     const enemyBullets = this.bulletManager.getActiveBullets('enemy');
 
     for (const b of enemyBullets) {
-      // Check graze first (larger radius)
-      this.player.checkGraze(b.x, b.y, b.size);
+      // Check graze first (larger radius), pass pool index so each bullet only triggers once
+      this.player.checkGraze(b.x, b.y, b.size, b.poolIndex);
 
       // Check hit (tiny hitbox)
       if (this.player.checkHit(b.x, b.y, b.size)) {
@@ -819,6 +819,7 @@ export class GameScene extends Phaser.Scene {
 
   private onBombActivated(_data: any): void {
     this.bulletManager.clear();
+    this.player.clearGrazeTracking();
     this.enemyManager.damageAll(BOMB_DAMAGE);
 
     // Also damage boss
@@ -828,7 +829,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onGraze(_data: { x: number; y: number }): void {
-    audioManager.playGraze();
+    // Graze is tracked silently - no per-bullet sound/visual to avoid spam
   }
 
   private onBossDefeated(_data: { bossId: string }): void {
@@ -849,6 +850,7 @@ export class GameScene extends Phaser.Scene {
 
   private onClearBullets(): void {
     this.bulletManager.clear();
+    this.player.clearGrazeTracking();
   }
 
   // -----------------------------------------------------------------------

@@ -23,6 +23,7 @@ export interface BulletData {
   age: number;
   color: number;
   type: 'enemy' | 'player';
+  poolIndex: number;
   gameObject: Phaser.GameObjects.Image | null;
 }
 
@@ -63,6 +64,7 @@ export class BulletManager {
         age: 0,
         color: 0xffffff,
         type: 'enemy',
+        poolIndex: i,
         gameObject: img,
       };
     }

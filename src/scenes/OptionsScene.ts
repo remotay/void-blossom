@@ -34,8 +34,10 @@ export class OptionsScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBackgroundColor(COLORS.bg_dark);
-    this.cameras.main.fadeIn(300, 0, 0, 0);
     this.selectedIndex = 0;
+
+    // Solid background rectangle so options is readable when launched as overlay
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, COLORS.bg_dark, 1);
 
     // Title
     this.add.text(GAME_WIDTH / 2, 60, 'OPTIONS', {
@@ -183,6 +185,14 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   private goBack(): void {
+    // If we were launched as overlay from PauseScene, just stop ourselves and resume it
+    if (this.returnScene === 'PauseScene' && this.scene.isActive('PauseScene') || this.scene.isPaused('PauseScene')) {
+      this.scene.resume('PauseScene');
+      this.scene.stop();
+      return;
+    }
+
+    // Otherwise, standard scene transition (from main menu)
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start(this.returnScene);
