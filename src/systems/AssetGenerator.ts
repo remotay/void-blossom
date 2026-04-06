@@ -1657,6 +1657,106 @@ export class AssetGenerator {
 
       this.finish(g, 'pickup_bomb', S, S);
     }
+
+    // ─ pickup_option ─ cyan/teal orb (floating drone helper), 14x14
+    {
+      const S = 14;
+      const g = this.makeGfx(scene);
+      const c = S / 2;
+
+      // Cyan glow aura
+      g.fillStyle(0x00ffcc, 0.2);
+      g.fillCircle(c, c, 7);
+
+      // Outer ring
+      g.lineStyle(1.5, 0x00ddaa, 0.9);
+      g.strokeCircle(c, c, 5);
+
+      // Inner orb
+      g.fillStyle(0x00eebb, 1);
+      g.fillCircle(c, c, 4);
+
+      // Bright highlight (upper-left)
+      g.fillStyle(0x66ffdd, 0.8);
+      g.fillCircle(c - 1.2, c - 1.2, 2.2);
+
+      // Center sparkle
+      g.fillStyle(0xffffff, 0.9);
+      g.fillCircle(c - 0.8, c - 0.8, 1);
+
+      // Tiny orbiting dots
+      for (let i = 0; i < 3; i++) {
+        const a = (Math.PI * 2 / 3) * i;
+        g.fillStyle(0x88ffee, 0.5);
+        g.fillCircle(c + Math.cos(a) * 5.5, c + Math.sin(a) * 5.5, 0.7);
+      }
+
+      this.finish(g, 'pickup_option', S, S);
+    }
+
+    // ─ pickup_rapid ─ orange lightning bolt (rapid fire), 14x16
+    {
+      const W = 14, H = 16;
+      const g = this.makeGfx(scene);
+      const cx = W / 2, cy = H / 2;
+
+      // Orange glow
+      g.fillStyle(0xff8800, 0.2);
+      g.fillCircle(cx, cy, 8);
+
+      // Lightning bolt shape
+      g.fillStyle(0xff9922, 1);
+      g.fillTriangle(cx + 3, 1, cx - 2, cy, cx + 1, cy);
+      g.fillTriangle(cx - 1, cy, cx - 4, H - 1, cx + 2, cy);
+
+      // Lighter inner bolt
+      g.fillStyle(0xffcc44, 0.8);
+      g.fillTriangle(cx + 2, 3, cx - 0.5, cy, cx + 1.5, cy);
+      g.fillTriangle(cx - 0.5, cy, cx - 2.5, H - 3, cx + 1.5, cy);
+
+      // Bright core line
+      g.lineStyle(1.5, 0xffee88, 0.9);
+      g.lineBetween(cx + 1, 2, cx - 0.5, cy);
+      g.lineBetween(cx + 0.5, cy, cx - 2, H - 2);
+
+      // Sparkle at top
+      g.fillStyle(0xffffff, 0.7);
+      g.fillCircle(cx + 1.5, 2, 1);
+
+      this.finish(g, 'pickup_rapid', W, H);
+    }
+
+    // ─ pickup_rear ─ purple double-arrow pointing backward, 16x14
+    {
+      const W = 16, H = 14;
+      const g = this.makeGfx(scene);
+      const cx = W / 2, cy = H / 2;
+
+      // Purple glow
+      g.fillStyle(0xaa44ff, 0.2);
+      g.fillCircle(cx, cy, 8);
+
+      // Left-pointing arrow (backward shot indicator)
+      g.fillStyle(0x9944ee, 1);
+      g.fillTriangle(2, cy, cx, cy - 5, cx, cy + 5);
+
+      // Second arrow slightly right
+      g.fillStyle(0xbb66ff, 0.9);
+      g.fillTriangle(cx - 2, cy, W - 3, cy - 4, W - 3, cy + 4);
+
+      // Bright highlight streaks
+      g.lineStyle(1.5, 0xcc88ff, 0.8);
+      g.lineBetween(4, cy, cx - 1, cy);
+      g.lineBetween(cx + 1, cy, W - 4, cy);
+
+      // Center sparkle
+      g.fillStyle(0xeeccff, 0.9);
+      g.fillCircle(cx, cy, 1.5);
+      g.fillStyle(0xffffff, 0.7);
+      g.fillCircle(cx - 0.3, cy - 0.3, 0.8);
+
+      this.finish(g, 'pickup_rear', W, H);
+    }
   }
 
   // ── UI ASSETS ────────────────────────────────────────────────────

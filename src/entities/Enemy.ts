@@ -315,13 +315,15 @@ export class Enemy extends Phaser.GameObjects.Container {
   }
 
   private emitDrops(): void {
+    const UPGRADE_TYPES = ['option', 'rapid', 'rear'] as const;
+
     // Grunts: small chance of point drop
     if (this.type === 'grunt') {
       if (Math.random() < 0.3) {
         this.scene.events.emit('spawn-pickup', { x: this.x, y: this.y, type: 'point' });
       }
     }
-    // Swoopers and spinners: moderate chance
+    // Swoopers and spinners: moderate chance + tiny upgrade chance
     else if (this.type === 'swooper' || this.type === 'spinner') {
       if (Math.random() < 0.4) {
         this.scene.events.emit('spawn-pickup', { x: this.x, y: this.y, type: 'point' });
@@ -329,15 +331,25 @@ export class Enemy extends Phaser.GameObjects.Container {
       if (Math.random() < 0.15) {
         this.scene.events.emit('spawn-pickup', { x: this.x, y: this.y, type: 'power' });
       }
+      // 5% chance of an upgrade drop
+      if (Math.random() < 0.05) {
+        const upType = UPGRADE_TYPES[Math.floor(Math.random() * UPGRADE_TYPES.length)];
+        this.scene.events.emit('spawn-pickup', { x: this.x, y: this.y, type: upType });
+      }
     }
-    // Turrets: decent power drops
+    // Turrets: decent power drops + small upgrade chance
     else if (this.type === 'turret') {
       this.scene.events.emit('spawn-pickup', { x: this.x, y: this.y, type: 'point' });
       if (Math.random() < 0.3) {
         this.scene.events.emit('spawn-pickup', { x: this.x, y: this.y, type: 'power' });
       }
+      // 8% chance of upgrade
+      if (Math.random() < 0.08) {
+        const upType = UPGRADE_TYPES[Math.floor(Math.random() * UPGRADE_TYPES.length)];
+        this.scene.events.emit('spawn-pickup', { x: this.x, y: this.y, type: upType });
+      }
     }
-    // Carriers: guaranteed power and points
+    // Carriers: guaranteed power, points, + good upgrade chance
     else if (this.type === 'carrier') {
       for (let i = 0; i < 3; i++) {
         this.scene.events.emit('spawn-pickup', {
@@ -353,8 +365,17 @@ export class Enemy extends Phaser.GameObjects.Container {
           type: 'point',
         });
       }
+      // 30% chance of upgrade drop
+      if (Math.random() < 0.3) {
+        const upType = UPGRADE_TYPES[Math.floor(Math.random() * UPGRADE_TYPES.length)];
+        this.scene.events.emit('spawn-pickup', {
+          x: this.x + (Math.random() - 0.5) * 20,
+          y: this.y + (Math.random() - 0.5) * 20,
+          type: upType,
+        });
+      }
     }
-    // Miniboss: lots of drops
+    // Miniboss: lots of drops + guaranteed upgrade
     else if (this.type === 'miniboss') {
       for (let i = 0; i < 6; i++) {
         this.scene.events.emit('spawn-pickup', {
@@ -370,6 +391,13 @@ export class Enemy extends Phaser.GameObjects.Container {
           type: 'point',
         });
       }
+      // Guaranteed upgrade drop from miniboss
+      const upType = UPGRADE_TYPES[Math.floor(Math.random() * UPGRADE_TYPES.length)];
+      this.scene.events.emit('spawn-pickup', {
+        x: this.x,
+        y: this.y,
+        type: upType,
+      });
     }
   }
 

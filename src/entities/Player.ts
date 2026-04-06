@@ -36,6 +36,12 @@ export class Player extends Phaser.GameObjects.Container {
   private lastShotTime = 0;
   private autoFire = false;
 
+  // Powerup upgrades (reset on death)
+  private optionCount = 0;       // 0–2 floating helper drones
+  private hasRapidFire = false;   // doubles fire rate
+  private hasRearShot = false;    // fires backward
+  private optionSprites: Phaser.GameObjects.Sprite[] = [];
+
   // Player state
   private power = 0;
   private lives = PLAYER_START_LIVES;
@@ -105,6 +111,17 @@ export class Player extends Phaser.GameObjects.Container {
     this.add(this.focusIndicator);
 
     this.setSize(32, 32);
+
+    // Pre-create option (drone) sprites – invisible until earned
+    for (let i = 0; i < 2; i++) {
+      const opt = this.scene.add.sprite(0, 0, 'pickup_option');
+      opt.setAlpha(0.85);
+      opt.setBlendMode(Phaser.BlendModes.ADD);
+      opt.setScale(1.2);
+      opt.setVisible(false);
+      opt.setDepth(19);
+      this.optionSprites.push(opt);
+    }
   }
 
   // ── Input Setup ───────────────────────────────────────────────────
@@ -180,7 +197,8 @@ export class Player extends Phaser.GameObjects.Container {
   private handleShooting(time: number): void {
     const firing = this.autoFire || this.keyZ.isDown;
     if (!firing) return;
-    if (time - this.lastShotTime < PLAYER_SHOT_COOLDOWN) return;
+    const cooldown = this.hasRapidFire ? PLAYER_SHOT_COOLDOWN * 0.55 : PLAYER_SHOT_COOLDOWN;
+    if (time - this.lastShotTime < cooldown) return;
 
     this.lastShotTime = time;
     this.fireShots();
@@ -211,6 +229,20 @@ export class Player extends Phaser.GameObjects.Container {
       this.spawnBullet(bulletGroup, this.x + 16, this.y + 4, 2, 660, tex);
       this.spawnBullet(bulletGroup, this.x + 12, this.y - 12, -8, 620, tex);
       this.spawnBullet(bulletGroup, this.x + 12, this.y + 12, 8, 620, tex);
+    }
+
+    // Rear shot upgrade – fire backward
+    if (this.hasRearShot) {
+      this.spawnBullet(bulletGroup, this.x - 12, this.y - 4, 178, 400, 'player_shot');
+      this.spawnBullet(bulletGroup, this.x - 12, this.y + 4, -178, 400, 'player_shot');
+    }
+
+    // Option drones – each fires a forward shot from its position
+    for (let i = 0; i < this.optionCount; i++) {
+      const opt = this.optionSprites[i];
+      if (opt && opt.visible) {
+        this.spawnBullet(bulletGroup, opt.x + 10, opt.y, 0, 580, 'player_shot_power');
+      }
     }
   }
 
@@ -341,6 +373,23 @@ export class Player extends Phaser.GameObjects.Container {
     } else {
       this.shipSprite.setRotation(0);
     }
+
+    // Position option drones – orbit slightly behind and above/below the player
+    const optOffsets = [
+      { dx: -18, dy: -24 },
+      { dx: -18, dy: 24 },
+    ];
+    for (let i = 0; i < 2; i++) {
+      const opt = this.optionSprites[i];
+      if (i < this.optionCount) {
+        opt.setVisible(true);
+        const bob = Math.sin(time * 0.005 + i * Math.PI) * 4;
+        opt.setPosition(this.x + optOffsets[i].dx, this.y + optOffsets[i].dy + bob);
+        opt.setAlpha(0.7 + 0.2 * Math.sin(time * 0.008 + i));
+      } else {
+        opt.setVisible(false);
+      }
+    }
   }
 
   // ── Death / Respawn ───────────────────────────────────────────────
@@ -376,6 +425,12 @@ export class Player extends Phaser.GameObjects.Container {
 
     // Lose some power on death
     this.power = Math.max(0, Math.floor(this.power * 0.6));
+
+    // Reset all powerup upgrades on death
+    this.optionCount = 0;
+    this.hasRapidFire = false;
+    this.hasRearShot = false;
+    for (const opt of this.optionSprites) opt.setVisible(false);
 
     // Hide briefly then respawn
     this.setVisible(false);
@@ -518,5 +573,33 @@ export class Player extends Phaser.GameObjects.Container {
 
   getGrazeRadius(): number {
     return PLAYER_GRAZE_RADIUS;
+  }
+
+  // ── Powerup Upgrade Accessors ─────────────────────────────────────
+
+  addOption(): void {
+    if (this.optionCount < 2) {
+      this.optionCount++;
+    }
+  }
+
+  setRapidFire(): void {
+    this.hasRapidFire = true;
+  }
+
+  setRearShot(): void {
+    this.hasRearShot = true;
+  }
+
+  getOptionCount(): number {
+    return this.optionCount;
+  }
+
+  getRapidFire(): boolean {
+    return this.hasRapidFire;
+  }
+
+  getRearShot(): boolean {
+    return this.hasRearShot;
   }
 }

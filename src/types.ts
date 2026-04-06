@@ -87,4 +87,4 @@ export interface PlayerState {
 }
 
 // Pickup types
-export type PickupType = 'power' | 'point' | 'life' | 'bomb';
+export type PickupType = 'power' | 'point' | 'life' | 'bomb' | 'option' | 'rapid' | 'rear';

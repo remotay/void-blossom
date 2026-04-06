@@ -20,6 +20,9 @@ interface HUDData {
   bossMaxHealth: number;
   bossName: string;
   stageName: string;
+  options: number;
+  rapidFire: boolean;
+  rearShot: boolean;
 }
 
 export class HUDScene extends Phaser.Scene {
@@ -30,6 +33,7 @@ export class HUDScene extends Phaser.Scene {
   private powerText!: Phaser.GameObjects.Text;
   private grazeText!: Phaser.GameObjects.Text;
   private stageText!: Phaser.GameObjects.Text;
+  private upgradesText!: Phaser.GameObjects.Text;
 
   // Power bar
   private powerBarBg!: Phaser.GameObjects.Graphics;
@@ -142,6 +146,18 @@ export class HUDScene extends Phaser.Scene {
       wordWrap: { width: HUD_WIDTH - 32 },
     });
 
+    // -- Upgrades --
+    y += 35;
+    this.add.text(leftPad, y, 'UPGRADES', textStyle);
+    y += 16;
+    this.upgradesText = this.add.text(leftPad, y, '---', {
+      fontFamily: 'monospace',
+      fontSize: '11px',
+      color: '#00ffcc',
+      wordWrap: { width: HUD_WIDTH - 32 },
+      lineSpacing: 2,
+    });
+
     // -- Controls hint at bottom --
     this.add.text(cx, GAME_HEIGHT - 60, 'Z: Shoot\nX: Bomb\nShift: Focus\nESC: Pause', {
       fontFamily: 'monospace',
@@ -192,6 +208,14 @@ export class HUDScene extends Phaser.Scene {
 
     // Stage name
     this.stageText.setText(data.stageName);
+
+    // Upgrades
+    const upgrades: string[] = [];
+    if (data.options > 0) upgrades.push(`Option x${data.options}`);
+    if (data.rapidFire) upgrades.push('Rapid Fire');
+    if (data.rearShot) upgrades.push('Rear Shot');
+    this.upgradesText.setText(upgrades.length > 0 ? upgrades.join('\n') : '---');
+    this.upgradesText.setColor(upgrades.length > 0 ? '#00ffcc' : '#444466');
 
     // Boss health bar
     if (data.bossActive && data.bossMaxHealth > 0) {

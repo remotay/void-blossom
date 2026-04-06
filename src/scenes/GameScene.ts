@@ -35,6 +35,9 @@ const PICKUP_COLORS: Record<PickupType, number> = {
   point: COLORS.accent,
   life: COLORS.player_hp,
   bomb: COLORS.primary,
+  option: 0x00ffcc,
+  rapid: 0xff8800,
+  rear: 0xaa44ff,
 };
 
 const PICKUP_TEXTURES: Record<PickupType, string> = {
@@ -42,6 +45,9 @@ const PICKUP_TEXTURES: Record<PickupType, string> = {
   point: 'pickup_point',
   life: 'pickup_life',
   bomb: 'pickup_bomb',
+  option: 'pickup_option',
+  rapid: 'pickup_rapid',
+  rear: 'pickup_rear',
 };
 
 const AUTO_COLLECT_DIST = 60;
@@ -389,6 +395,18 @@ export class GameScene extends Phaser.Scene {
       case 'bomb':
         this.player.addBomb();
         break;
+      case 'option':
+        this.player.addOption();
+        this.showUpgradeText('OPTION +1');
+        break;
+      case 'rapid':
+        this.player.setRapidFire();
+        this.showUpgradeText('RAPID FIRE!');
+        break;
+      case 'rear':
+        this.player.setRearShot();
+        this.showUpgradeText('REAR SHOT!');
+        break;
     }
   }
 
@@ -553,6 +571,27 @@ export class GameScene extends Phaser.Scene {
       alpha: 0,
       duration: 150,
       onComplete: () => spark.destroy(),
+    });
+  }
+
+  /** Flash a brief upgrade notification near the player */
+  private showUpgradeText(msg: string): void {
+    const t = this.add.text(this.player.hitboxX, this.player.hitboxY - 30, msg, {
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      color: '#00ffcc',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(60);
+
+    this.tweens.add({
+      targets: t,
+      y: t.y - 40,
+      alpha: 0,
+      duration: 1200,
+      ease: 'Power2',
+      onComplete: () => t.destroy(),
     });
   }
 
@@ -901,6 +940,10 @@ export class GameScene extends Phaser.Scene {
       bossMaxHealth: this.boss ? this.boss.maxHealth : 0,
       bossName: this.boss ? this.boss.bossName : '',
       stageName: this.stageData?.name ?? '',
+      // Upgrade info
+      options: this.player.getOptionCount(),
+      rapidFire: this.player.getRapidFire(),
+      rearShot: this.player.getRearShot(),
     });
   }
 
