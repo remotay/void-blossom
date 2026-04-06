@@ -64,6 +64,7 @@ export class GameScene extends Phaser.Scene {
   private stageElapsed = 0;
   private waveIndex = 0;
   private bossActive = false;
+  private bossTriggered = false;
   private stageClear = false;
 
   // Background
@@ -91,6 +92,7 @@ export class GameScene extends Phaser.Scene {
     this.stageElapsed = 0;
     this.waveIndex = 0;
     this.bossActive = false;
+    this.bossTriggered = false;
     this.stageClear = false;
     this.boss = null;
     this.paused = false;
@@ -461,7 +463,7 @@ export class GameScene extends Phaser.Scene {
   // -----------------------------------------------------------------------
 
   private updateWaves(delta: number): void {
-    if (!this.stageData || this.bossActive) return;
+    if (!this.stageData || this.bossActive || this.bossTriggered) return;
 
     this.stageElapsed += delta;
     const waves = this.stageData.waves;
@@ -478,7 +480,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     // All waves spawned - check if it's boss time
-    if (this.waveIndex >= waves.length && !this.bossActive) {
+    if (this.waveIndex >= waves.length && !this.bossTriggered) {
       // Check if a boss wave exists
       const bossWave = waves.find(w => w.isBoss);
       if (bossWave && this.stageData.boss) {
@@ -508,8 +510,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private triggerBoss(): void {
-    if (this.bossActive || !this.stageData.boss) return;
+    if (this.bossTriggered || !this.stageData.boss) return;
 
+    this.bossTriggered = true;
     this.bossActive = true;
 
     // Clear remaining enemies and bullets for clean dialogue
